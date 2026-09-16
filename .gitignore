@@ -1,0 +1,27 @@
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / VS Code / JetBrains
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+## Publish / Artifacts
+publish/
+*.publishproj

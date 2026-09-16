@@ -1,7 +1,0 @@
-{
-    "Run": "dotnet run",
-    "Seeding": "dotnet run --seed",
-    "Reset": "dotnet run --reset",
-    "stop-docker": "docker stop mssql-server",
-    "start-docker": "docker start mssql-server"
-}
