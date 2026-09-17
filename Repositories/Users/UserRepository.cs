@@ -1,13 +1,11 @@
 using Dapper;
 using NotesApi.Data;
 using NotesApi.Models;
-using NotesApi.Repositories.Interfaces;
 
 namespace NotesApi.Repositories;
 
-
-
-public class UserRepository : IUserRepository{
+public class UserRepository : IUserRepository
+{
     private readonly ISqlConnectionFactory _connectionFactory;
 
     public UserRepository(ISqlConnectionFactory connectionFactory)
@@ -19,9 +17,8 @@ public class UserRepository : IUserRepository{
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            SELECT Id, Username, PasswordHash, Role, CreatedAt, IsDeleted
+            SELECT Id, Username, PasswordHash, Role, CreatedAt
             FROM Users
-            WHERE IsDeleted = 0
             ORDER BY CreatedAt DESC;
             """;
 
@@ -32,9 +29,9 @@ public class UserRepository : IUserRepository{
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            SELECT Id, Username, PasswordHash, Role, CreatedAt, IsDeleted
+            SELECT Id, Username, PasswordHash, Role, CreatedAt
             FROM Users
-            WHERE Id = @Id AND IsDeleted = 0;
+            WHERE Id = @Id;
             """;
 
         var paramaters = new { Id = id };
@@ -45,9 +42,9 @@ public class UserRepository : IUserRepository{
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            SELECT Id, Username, PasswordHash, Role, CreatedAt, IsDeleted
+            SELECT Id, Username, PasswordHash, Role, CreatedAt
             FROM Users
-            WHERE Username = @Username AND IsDeleted = 0;
+            WHERE Username = @Username;
             """;
 
         var paramaters = new { Username = username };
@@ -60,7 +57,7 @@ public class UserRepository : IUserRepository{
         const string sqlQuery = """
             SELECT COUNT(1)
             FROM Users
-            WHERE Username = @Username AND IsDeleted = 0;
+            WHERE Username = @Username;
             """;
 
         var paramaters = new { Username = username };
@@ -72,9 +69,9 @@ public class UserRepository : IUserRepository{
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            INSERT INTO Users (Username, PasswordHash, Role, CreatedAt, IsDeleted)
+            INSERT INTO Users (Username, PasswordHash, Role, CreatedAt)
             OUTPUT INSERTED.Id
-            VALUES (@Username, @PasswordHash, @Role, @CreatedAt, @IsDeleted);
+            VALUES (@Username, @PasswordHash, @Role, @CreatedAt);
             """;
 
         return await connection.ExecuteScalarAsync<int>(sqlQuery, user);

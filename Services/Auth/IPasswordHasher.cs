@@ -1,4 +1,4 @@
-namespace NotesApi.Services.Interfaces;
+namespace NotesApi.Services;
 
 public interface IPasswordHasher
 {

@@ -1,7 +1,6 @@
 using NotesApi.DTOs;
 using NotesApi.Models;
-using NotesApi.Repositories.Interfaces;
-using NotesApi.Services.Interfaces;
+using NotesApi.Repositories;
 
 namespace NotesApi.Services;
 
@@ -14,33 +13,27 @@ public class NoteService : INoteService
     }
 
     // Get Notes of User
-    public async Task<IEnumerable<NoteDetailDto>> GetNotesForUserAsync(int userId, NoteQueryDto query){
+    public async Task<IEnumerable<NoteDetailDto>> GetNotesForUser(int userId, NoteQueryDto query){
         var notes = await _repository.GetAllByUserAsync(
             userId: userId,
             search: query.Search,
-            fromDate: query.FromDate,
-            toDate: query.ToDate,
+            category: query.Category,
             sortOrder: query.SortOrder
         );
 
-        var result = new List<NoteDetailDto>();
-        foreach (var note in notes){
-            var dto = new NoteDetailDto(
-                note.Id,
-                note.Title,
-                note.Content,
-                note.UserId,
-                note.CreatedAt,
-                note.UpdatedAt
-            );
-            result.Add(dto);
-        }
-
-        return result;
+        return notes.Select(note => new NoteDetailDto(
+            note.Id,
+            note.Title,
+            note.Content,
+            note.Category,
+            note.UserId,
+            note.CreatedAt,
+            note.UpdatedAt
+        ));
     }
 
     // Get One by ID
-    public async Task<NoteDetailDto?> GetNoteByIdForUserAsync(int id, int userId){
+    public async Task<NoteDetailDto?> GetNoteByIdForUser(int id, int userId){
         var note = await _repository.GetByIdAndUserAsync(id, userId);
         if (note == null) return null;
 
@@ -48,6 +41,7 @@ public class NoteService : INoteService
             note.Id,
             note.Title,
             note.Content,
+            note.Category,
             note.UserId,
             note.CreatedAt,
             note.UpdatedAt
@@ -55,10 +49,11 @@ public class NoteService : INoteService
     }
 
     // Create note
-    public async Task<NoteDetailDto> CreateNoteAsync(CreateNoteDto userDto, int userId){
+    public async Task<NoteDetailDto> CreateNote(CreateNoteDto userDto, int userId){
         var note = new Note{
             Title = userDto.Title,
             Content = userDto.Content ?? string.Empty,
+            Category = string.IsNullOrWhiteSpace(userDto.Category) ? "Personal" : userDto.Category.Trim(),
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = null
@@ -71,6 +66,7 @@ public class NoteService : INoteService
             note.Id,
             note.Title,
             note.Content,
+            note.Category,
             note.UserId,
             note.CreatedAt,
             note.UpdatedAt
@@ -78,19 +74,23 @@ public class NoteService : INoteService
     }
 
     // Update by ID
-    public async Task<bool> UpdateNoteAsync(int id, UpdateNoteDto dto, int userId){
+    public async Task<bool> UpdateNote(int id, UpdateNoteDto dto, int userId){
         var existingNote = await _repository.GetByIdAndUserAsync(id, userId);
         if (existingNote == null) return false;
 
         existingNote.Title = dto.Title;
         existingNote.Content = dto.Content ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(dto.Category))
+        {
+            existingNote.Category = dto.Category.Trim();
+        }
         existingNote.UpdatedAt = DateTime.UtcNow;
 
         return await _repository.UpdateAsync(existingNote);
     }
 
     //Delete by ID
-    public async Task<bool> DeleteNoteAsync(int id, int userId){
+    public async Task<bool> DeleteNote(int id, int userId){
         return await _repository.DeleteAsync(id, userId);
     }
 }

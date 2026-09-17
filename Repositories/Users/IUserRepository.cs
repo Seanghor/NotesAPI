@@ -1,6 +1,6 @@
 using NotesApi.Models;
 
-namespace NotesApi.Repositories.Interfaces;
+namespace NotesApi.Repositories;
 
 public interface IUserRepository
 {

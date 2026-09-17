@@ -1,45 +1,37 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
+using NotesApi.Common;
 using NotesApi.Data;
 using NotesApi.Repositories;
-using NotesApi.Repositories.Interfaces;
 using NotesApi.Services;
-using NotesApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controller & API Services
-builder.Services.AddControllers();
+// Controllers
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = ctx =>
+        {
+            var error = ctx.ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            return new BadRequestObjectResult(ApiResponse.Error(error ?? "Invalid input"));
+        };
+    });
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 
-// JWT Authentication & Authorization
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSettings["Key"] 
-    ?? throw new InvalidOperationException("JWT Secret Key 'Jwt:Key' is not configured.");
-
-builder.Services.AddAuthentication(options =>
+// CORS
+builder.Services.AddCors(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.MapInboundClaims = false; // Keeps clean claim names (id, username, role)
-    options.TokenValidationParameters = new TokenValidationParameters
+    options.AddDefaultPolicy(policy =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"] ?? "NotesApi",
-        ValidAudience = jwtSettings["Audience"] ?? "NotesApiUsers",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-    };
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
-builder.Services.AddAuthorization();
+// JWT Authentication & Authorization
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Dependency Injection
 builder.Services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
@@ -54,7 +46,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
-//  Commands (--reset, --seed) or Startup Auto-Seed
+//  Seed & Reset
 if (args.Contains("--reset"))
 {
     await Seed.ResetDatabase(app.Services);
@@ -77,6 +69,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

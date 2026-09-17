@@ -13,6 +13,8 @@ public class Note
 
     public string Content { get; set; } = string.Empty;
 
+    public string Category { get; set; } = "Personal";
+
     [ForeignKey("User")]
     public int UserId { get; set; }
     

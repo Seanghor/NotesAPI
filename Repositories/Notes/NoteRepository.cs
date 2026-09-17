@@ -1,7 +1,6 @@
 using Dapper;
 using NotesApi.Data;
 using NotesApi.Models;
-using NotesApi.Repositories.Interfaces;
 
 namespace NotesApi.Repositories;
 
@@ -15,16 +14,15 @@ public class NoteRepository : INoteRepository
     }
 
 
-    public async Task<IEnumerable<Note>> GetAllByUserAsync(int userId, string? search, DateTime? fromDate, DateTime? toDate, string? sortOrder)
+    public async Task<IEnumerable<Note>> GetAllByUserAsync(int userId, string? search, string? category, string? sortOrder)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            SELECT Id, Title, Content, UserId, CreatedAt, UpdatedAt
+            SELECT Id, Title, Content, Category, UserId, CreatedAt, UpdatedAt
             FROM Notes
             WHERE UserId = @UserId
-                AND (@Search IS NULL OR Title LIKE '%' + @Search + '%')
-                AND (@FromDate IS NULL OR CreatedAt >= @FromDate)
-                AND (@ToDate IS NULL OR CreatedAt <= @ToDate)
+                AND (@Search IS NULL OR Title LIKE '%' + @Search + '%' OR Content LIKE '%' + @Search + '%')
+                AND (@Category IS NULL OR @Category = 'All' OR Category = @Category)
             ORDER BY
                 CASE WHEN @SortOrder = 'asc' THEN CreatedAt END ASC,
                 CASE WHEN @SortOrder <> 'asc' OR @SortOrder IS NULL THEN CreatedAt END DESC;
@@ -32,8 +30,7 @@ public class NoteRepository : INoteRepository
         var paramaters = new  { 
             UserId = userId,
             Search = string.IsNullOrWhiteSpace(search) ? null : search.Trim(),
-            FromDate = fromDate,
-            ToDate = toDate,
+            Category = string.IsNullOrWhiteSpace(category) ? null : category.Trim(),
             SortOrder = sortOrder?.ToLowerInvariant()
         };
         return await connection.QueryAsync<Note>(sqlQuery, paramaters);
@@ -44,7 +41,7 @@ public class NoteRepository : INoteRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            SELECT Id, Title, Content, UserId, CreatedAt, UpdatedAt
+            SELECT Id, Title, Content, Category, UserId, CreatedAt, UpdatedAt
             FROM Notes
             WHERE Id = @Id AND UserId = @UserId;
             """;
@@ -57,9 +54,9 @@ public class NoteRepository : INoteRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sqlQuery = """
-            INSERT INTO Notes (Title, Content, UserId, CreatedAt, UpdatedAt)
+            INSERT INTO Notes (Title, Content, Category, UserId, CreatedAt, UpdatedAt)
             OUTPUT INSERTED.Id
-            VALUES (@Title, @Content, @UserId, @CreatedAt, @UpdatedAt);
+            VALUES (@Title, @Content, @Category, @UserId, @CreatedAt, @UpdatedAt);
             """;
 
         return await connection.ExecuteScalarAsync<int>(sqlQuery, note);
@@ -72,6 +69,7 @@ public class NoteRepository : INoteRepository
             UPDATE Notes
             SET Title = @Title,
                 Content = @Content,
+                Category = @Category,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id AND UserId = @UserId;
             """;

@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using NotesApi.Models;
-using NotesApi.Services.Interfaces;
 
 namespace NotesApi.Services;
 

@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using NotesApi.Services.Interfaces;
 
 namespace NotesApi.Services;
 
