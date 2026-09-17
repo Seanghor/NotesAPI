@@ -17,8 +17,7 @@ public class NoteService : INoteService
         var notes = await _repository.GetAllByUserAsync(
             userId: userId,
             search: query.Search,
-            fromDate: query.FromDate,
-            toDate: query.ToDate,
+            category: query.Category,
             sortOrder: query.SortOrder
         );
 
@@ -26,6 +25,7 @@ public class NoteService : INoteService
             note.Id,
             note.Title,
             note.Content,
+            note.Category,
             note.UserId,
             note.CreatedAt,
             note.UpdatedAt
@@ -41,6 +41,7 @@ public class NoteService : INoteService
             note.Id,
             note.Title,
             note.Content,
+            note.Category,
             note.UserId,
             note.CreatedAt,
             note.UpdatedAt
@@ -52,6 +53,7 @@ public class NoteService : INoteService
         var note = new Note{
             Title = userDto.Title,
             Content = userDto.Content ?? string.Empty,
+            Category = string.IsNullOrWhiteSpace(userDto.Category) ? "Personal" : userDto.Category.Trim(),
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = null
@@ -64,6 +66,7 @@ public class NoteService : INoteService
             note.Id,
             note.Title,
             note.Content,
+            note.Category,
             note.UserId,
             note.CreatedAt,
             note.UpdatedAt
@@ -77,6 +80,10 @@ public class NoteService : INoteService
 
         existingNote.Title = dto.Title;
         existingNote.Content = dto.Content ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(dto.Category))
+        {
+            existingNote.Category = dto.Category.Trim();
+        }
         existingNote.UpdatedAt = DateTime.UtcNow;
 
         return await _repository.UpdateAsync(existingNote);

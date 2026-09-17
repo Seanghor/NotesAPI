@@ -54,7 +54,6 @@ public class AuthController : ControllerBase
             Role: user.Role,
             ExpiresAt: expiresAt
         );
-
         return StatusCode(
             StatusCodes.Status201Created,
             ApiResponse<AuthResponseDto>.Success(authData, "User registered successfully", StatusCodes.Status201Created)

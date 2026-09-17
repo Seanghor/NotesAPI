@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using NotesApi.Common;
 using NotesApi.Data;
 using NotesApi.Repositories;
@@ -6,9 +7,28 @@ using NotesApi.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = ctx =>
+        {
+            var error = ctx.ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            return new BadRequestObjectResult(ApiResponse.Error(error ?? "Invalid input"));
+        };
+    });
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // JWT Authentication & Authorization
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -49,6 +69,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
