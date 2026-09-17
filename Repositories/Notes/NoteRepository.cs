@@ -1,7 +1,6 @@
 using Dapper;
 using NotesApi.Data;
 using NotesApi.Models;
-using NotesApi.Repositories.Interfaces;
 
 namespace NotesApi.Repositories;
 

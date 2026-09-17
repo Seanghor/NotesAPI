@@ -1,7 +1,7 @@
 using Dapper;
 using NotesApi.Models;
-using NotesApi.Repositories.Interfaces;
-using NotesApi.Services.Interfaces;
+using NotesApi.Repositories;
+using NotesApi.Services;
 
 namespace NotesApi.Data;
 
@@ -22,8 +22,7 @@ public static class Seed
                 Username = "techbodia",
                 PasswordHash = passwordHasher.HashPassword("admin@12345"),
                 Role = "User",
-                CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                CreatedAt = DateTime.UtcNow
             };
 
             var user1Id = await userRepository.CreateAsync(defaultUser1);
@@ -54,8 +53,7 @@ public static class Seed
                 Username = "seanghor",
                 PasswordHash = passwordHasher.HashPassword("admin@12345"),
                 Role = "User",
-                CreatedAt = new DateTime(2026, 8, 10, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = false
+                CreatedAt = new DateTime(2026, 8, 10, 0, 0, 0, DateTimeKind.Utc)
             };
 
             var user2Id = await userRepository.CreateAsync(defaultUser2);

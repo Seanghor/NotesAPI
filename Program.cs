@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NotesApi.Data;
 using NotesApi.Repositories;
-using NotesApi.Repositories.Interfaces;
 using NotesApi.Services;
-using NotesApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,6 +1,6 @@
 using NotesApi.Models;
 
-namespace NotesApi.Services.Interfaces;
+namespace NotesApi.Services;
 
 public interface ITokenService
 {

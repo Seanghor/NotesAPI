@@ -1,10 +1,8 @@
 using NotesApi.DTOs;
 using NotesApi.Models;
-using NotesApi.Repositories.Interfaces;
-using NotesApi.Services.Interfaces;
+using NotesApi.Repositories;
 
 namespace NotesApi.Services;
-
 
 public class UserService : IUserService
 {
@@ -18,7 +16,7 @@ public class UserService : IUserService
     }
 
     // -- service:--> Get All
-    public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
+    public async Task<IEnumerable<UserResponseDto>> GetAllUsers()
     {
         var users = await _userRepository.GetAllAsync();
         return users.Select(u => new UserResponseDto(
@@ -30,7 +28,7 @@ public class UserService : IUserService
     }
 
     // -- service:--> Get By ID
-    public async Task<UserResponseDto?> GetUserByIdAsync(int id)
+    public async Task<UserResponseDto?> GetUserById(int id)
     {
         var user = await _userRepository.GetByIdAsync(id);
         if (user is null) return null;
@@ -44,13 +42,13 @@ public class UserService : IUserService
     }
 
     // -- service:--> Get By Username
-    public async Task<User?> GetUserByUsernameAsync(string username)
+    public async Task<User?> GetUserByUsername(string username)
     {
         return await _userRepository.GetByUsernameAsync(username);
     }
 
     // -- service:--> Create 
-    public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
+    public async Task<UserResponseDto> CreateUser(CreateUserDto dto)
     {
         var exists = await _userRepository.ExistsByUsernameAsync(dto.Username);
         if (exists)
@@ -63,8 +61,7 @@ public class UserService : IUserService
             Username = dto.Username.Trim(),
             PasswordHash = _passwordHasher.HashPassword(dto.Password),
             Role = string.IsNullOrWhiteSpace(dto.Role) ? "User" : dto.Role.Trim(),
-            CreatedAt = DateTime.UtcNow,
-            IsDeleted = false
+            CreatedAt = DateTime.UtcNow
         };
 
         var newId = await _userRepository.CreateAsync(user);
