@@ -2,6 +2,8 @@
     "Run": "dotnet run",
     "Seeding": "dotnet run --seed",
     "Reset": "dotnet run --reset",
+    "create-migration-first-time": "dotnet ef migrations add InitialCreate",
+    "update-migration": "dotnet ef database update",
     "stop-docker": "docker stop mssql-server",
     "start-docker": "docker start mssql-server"
 }
