@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NotesApi.Common;
 using NotesApi.Data;
 using NotesApi.Repositories;
@@ -30,10 +31,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-// JWT Authentication & Authorization
+// >>JWT 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-// Dependency Injection
+// Db Context for EF Migrations    
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
